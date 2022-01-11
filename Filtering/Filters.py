@@ -18,7 +18,7 @@ class Filtering:
         # 9x9 filter
         self.nine_filter = np.ones([9, 9]) * (1 / 81)
 
-    def padding(self, img):         # add border around the image by reflecting edge pixels
+    def padding(self, img):                                                                                 # add border around the image by reflecting edge pixels
 
         if self.filter_size == 3:
             padded = cv2.copyMakeBorder(img, 1, 1, 1, 1, cv2.BORDER_REFLECT)
@@ -47,7 +47,7 @@ class Filtering:
 
         return output
 
-    def gaussian_kernel(self, sigma):       # creates the Gaussian kernel
+    def gaussian_kernel(self, sigma):                                                                       # creates the Gaussian kernel
 
         x, y = np.mgrid[-self.filter_size // 2 + 1: self.filter_size // 2 + 1,
                         -self.filter_size // 2 + 1: self.filter_size // 2 + 1]
@@ -64,7 +64,7 @@ class Filtering:
         for i in range(padded.shape[0] - self.filter_size + 1):
             for j in range(padded.shape[1] - self.filter_size + 1):
                 window = padded[i:i + self.filter_size, j:j + self.filter_size]
-                new_pixel = np.sum(window * kernel, axis=(0, 1))                    # element wise multiplication
+                new_pixel = np.sum(window * kernel, axis=(0, 1))                                            # element wise multiplication
                 output[i][j] = new_pixel
 
         return output
@@ -106,21 +106,21 @@ class Filtering:
 
         output = np.copy(self.image)
         height, weight, _ = self.image.shape
-        radius = self.filter_size // 2                  # radius is the size of each quadrant
+        radius = self.filter_size // 2                                                                      # radius is the size of each quadrant
 
         # iterate on rgb image
         for h in range(height):
             for w in range(weight):
-                window = _v[h: h + self.filter_size, w: w + self.filter_size]           # extract the window from V
+                window = _v[h: h + self.filter_size, w: w + self.filter_size]                               # extract the window from V
                 # divide the window into 4 equal sized subregions
                 _Q1 = window[0: radius + 1, 0: radius + 1]
                 _Q2 = window[0: radius + 1, radius: radius + radius + 1]
                 _Q3 = window[radius: radius + radius + 1, 0: radius + 1]
                 _Q4 = window[radius: radius + radius + 1, radius: radius + radius + 1]
 
-                q_idx = self.find_min(_Q1, _Q2, _Q3, _Q4)                         # find the region that has min std dev
+                q_idx = self.find_min(_Q1, _Q2, _Q3, _Q4)                                                   # find the region that has min std dev
 
-                new_pixel = self.calculate_mean(q_idx, rgb_padded, h, w, radius)   # get mean of each channel separately
+                new_pixel = self.calculate_mean(q_idx, rgb_padded, h, w, radius)                            # get mean of each channel separately
 
                 output[h][w][0] = new_pixel[0]
                 output[h][w][1] = new_pixel[1]
@@ -131,16 +131,16 @@ class Filtering:
 
 if __name__ == '__main__':
 
-    rgb_img = cv2.imread("./france.jpg")  # read image
-    rgb_img = cv2.resize(rgb_img, (int(rgb_img.shape[1] * 1 / 2), int(rgb_img.shape[0] * 1 / 2)))  # resize image by 1/2
+    rgb_img = cv2.imread("./france.jpg")                                                                    # read image
+    rgb_img = cv2.resize(rgb_img, (int(rgb_img.shape[1] * 1 / 2), int(rgb_img.shape[0] * 1 / 2)))           # resize image by 1/2
 
     f = Filtering(rgb_img, 9)
     padded_img = f.padding(rgb_img)
     """
     # Kuwahara Filter
 
-    padded_hsv = f.padding(cv2.cvtColor(rgb_img, cv2.COLOR_BGR2HSV))            # hsv img is also padded
-    v = padded_hsv[:, :, 2]                                                     # take V component only
+    padded_hsv = f.padding(cv2.cvtColor(rgb_img, cv2.COLOR_BGR2HSV))                                        # hsv img is also padded
+    v = padded_hsv[:, :, 2]                                                                                 # take V component only
     kuwahara_filtered = f.kuwahara_filter(padded_img, v)
 
     # cv2.imwrite("5x5 Kuwahara Filtered Image.jpg", kuwahara_filtered)"""
@@ -152,14 +152,14 @@ if __name__ == '__main__':
     """
     # Mean Filter
     
-    mean_filtered = f.mean_filter(padded_img, f.nine_filter)                # filter should be changed according to size
+    mean_filtered = f.mean_filter(padded_img, f.nine_filter)                                                # filter should be changed according to size
     # cv2.imwrite("5x5 " + "Mean Filtered Image.jpg", mean_filtered)
     """
 
     # Gaussian Filter
     
     g_kernel = f.gaussian_kernel(sigma=1)
-    gaussian_filtered = f.gaussian_filter(padded_img, g_kernel)             # create Gaussian kernel according to size
+    gaussian_filtered = f.gaussian_filter(padded_img, g_kernel)                                             # create Gaussian kernel according to size
     # cv2.imwrite("5x5 sig_1 Gaussian Filtered Image.jpg", gaussian_filtered)
 
 
